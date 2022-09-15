@@ -1,0 +1,101 @@
+1. Project setup:
+    i.  create project:
+            > django-admin startproject My_Ecom_Project
+
+    ii. create virtual enviroment in CMD:
+            python -m venv env
+            env\Scripts\activate
+
+    iii. create & install requirements.txt:
+            > pip install -r requirements.txt
+    
+    iv. create folder: templates, media, static
+        and add them in settings.py:
+
+                TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
+                STATIC_DIR = os.path.join(BASE_DIR, 'static')
+                MEDIA_DIR = os.path.join(BASE_DIR, 'media')
+
+        
+                'DIRS': [TEMPLATES_DIR, ],
+
+                TIME_ZONE = 'Asia/Dhaka'
+
+
+
+                STATIC_URL = '/static/'
+                STATICFILES_DIR = [STATIC_DIR, ]
+
+                MEDIA_ROOT = MEDIA_DIR
+                MEDIA_URL = '/media'
+
+                LOGIN_URL = '/'
+
+
+    v. crispy_forms at in settings.py:
+            INSTALLED_APPS = [
+                'crispy_forms',
+        ]
+
+        CRISPY_TEMPLATE_PACK = 'bootstrap4'
+
+
+    vi. create app:
+            > py manage.py startapp App_Login
+            > py manage.py startapp App_Shop 
+    
+    vii. add them in settings.py:
+            INSTALLED_APPS = [
+                'App_Login',
+                'App_Shop',
+        ]
+   
+    viii. templates directory:
+        create two folder:
+                a. App_Login
+                b. App_Shop
+
+
+    ix. create base.html and navbar.html:
+
+
+    x. create in static folder:  
+        // here create file main.css
+
+    
+    xi. main urls.py:
+
+                from django.urls import path, include
+
+                # TO show media files
+                from django.conf import settings
+                from django.contrib.staticfiles.urls import static, staticfiles_urlpatterns
+
+
+                urlpatterns += staticfiles_urlpatterns()
+                urlpatterns += static(settings.MEDIA_URL, decument_root=settings.MEDIA_ROOT)
+
+
+    xii. create urls.py in both apps:
+        a. App_Login\urls.py:
+                from django.urls import path
+
+                app_name = 'App_Login'
+
+                urlpatterns = [
+
+                ]
+
+        b.App_Shop\urls.py:
+                from django.urls import path
+
+                app_name = 'App_Shop'
+
+                urlpatterns = [
+                
+                ]
+
+
+    xiii. indicate them in main urls.py:
+            path('', include('App_Shop.urls')),
+            path('account/', include('App_Login.urls')),

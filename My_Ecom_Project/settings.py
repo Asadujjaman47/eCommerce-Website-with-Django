@@ -35,6 +35,9 @@ INSTALLED_APPS = [
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
+# Custom user model
+AUTH_USER_MODEL = 'App_Login.User'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -117,6 +120,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIR = [STATIC_DIR, ]
 
 MEDIA_ROOT = MEDIA_DIR
-MEDIA_URL = '/media'
+MEDIA_URL = '/media/'
 
 LOGIN_URL = '/'

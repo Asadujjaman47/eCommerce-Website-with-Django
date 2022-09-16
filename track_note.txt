@@ -549,3 +549,111 @@ from django.contrib import messages
 
                 </div>
 
+
+5. Now create App_Shop model:
+        i. App_Shop\models.py:
+                from django.db import models
+
+                # Create your models here.
+
+
+                class Category(models.Model):
+                        title = models.CharField(max_length=20)
+                        created = models.DateTimeField(auto_now_add=True)
+
+                        def __str__(self):
+                                return self.title
+
+                        class Meta:
+                                verbose_name_plural = "Categories"
+
+
+                class Product(models.Model):
+                        mainimage = models.ImageField(upload_to='Products')
+                        name = models.CharField(max_length=254)
+                        category = models.ForeignKey(
+                                Category, on_delete=models.CASCADE, related_name='category')
+                        preview_text = models.TextField(
+                                max_length=200, verbose_name='Preview Text')
+                        detail_text = models.TextField(max_length=1000, verbose_name='Description')
+                        price = models.FloatField()
+                        old_price = models.FloatField(default=0.00)
+                        created = models.DateTimeField(auto_now_add=True)
+
+                        def __str__(self):
+                                return self.name
+
+                        class Meta:
+                                ordering = ['-created', ]
+
+
+        ii. make migration:
+                > py manage.py makemigrations App_Shop
+                > py manage.py migrate 
+
+
+        iii. register in App_Shop\admin.py:
+                from App_Shop.models import Category, Product
+
+                # Register your models here.
+
+                admin.site.register(Category)
+                admin.site.register(Product)
+
+        
+
+// product display, home view:
+        iv. App_Shop\views.py:
+
+                # Import Views
+                from django.views.generic import ListView, DetailView
+
+                # Models
+                from App_Shop.models import Product
+
+                # Create your views here.
+
+
+                class Home(ListView):
+                model = Product
+                template_name = 'App_Shop/home.html'
+
+        v. add in App_Shop\urls.py:
+                path('', views.Home.as_view, name='home'),
+
+        vi. create templates\App_Shop\home.html:
+
+
+                {% extends 'base.html' %}
+                {% block body_block %}
+
+                {% for product in object_list %}
+
+                        {{product.name}}
+
+                {% endfor %}
+                {% endblock %}
+
+
+
+        vii. now we can change HttpResponse in App_Login\views:
+        login_user:
+                return HttpResponseRedirect(reverse('App_Shop:home'))
+
+        logout_user:
+                return HttpResponseRedirect(reverse('App_Shop:home'))
+
+
+
+        viii.
+// now login to the admin pannel and add some product:
+        http://127.0.0.1:8000/admin
+                Email: asadujjaman255@gmail.com
+                Password: 1234
+
+        // here add some category:
+
+        // we add product, under those category, 
+
+        now visit homepage, and see product title,
+        

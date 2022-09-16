@@ -270,10 +270,193 @@ http://127.0.0.1:8000/admin
                 and see the changes
 
 
+3. 
+        i. create App_Login\forms.py:
+        // Profile form, signup form:
+
+
+                from dataclasses import field
+                from django.forms import ModelForm
+                from App_Login.models import User, Profile
+
+                from django.contrib.auth.forms import UserCreationForm
+
+
+                # forms
+
+                class ProfileForm(ModelForm):
+                class Meta:
+                        model = Profile
+                        exclude = ('user',)
+
+
+                class SignUpForm(UserCreationForm):
+                class Meta:
+                        model = User
+                        fields = ('email', 'password1', 'password2',)
 
 
 
 
+        ii. App_Login\views.py:
+        // sign up view, logout view, login view, user profile view
 
+
+        iii. but first we set template before views:
+
+                create in templates\App_Login: 
+                        login.html, sign_up.html, change_profile.html 
+
+
+                base.html:
+                        {% load static %}
+                        <!doctype html>
+                        <html lang="en">
+                        <head>
+                        <!-- Required meta tags -->
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                        <meta http-equiv-"X-UA-Compatible" content="ie=edge">
+
+                        <!-- Bootstrap CSS -->
+                        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+
+                        <!-- Font Awesome-->
+                        <script src="https://kit.fontawesome.com/71ddbaf830.js" crossorigin="anonymous"></script>
+                        
+                        <!-- Add our CSS -->
+                        <link rel="stylesheet" href="{% static 'css/main.css' %}">
+
+                        <title>{% block title_block %} E-com | Shop {% endblock%}</title>
+
+                        {% block css_block %}
+                        {% endblock %}
+
+                        </head>
+                        <body>
+
+                        <div class="container" style="padding-top: 20px">
+                                {% block body_block %}  {% endblock %}
+
+                        </div>
+
+
+                        
+                        <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+                        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+                        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
+                        
+                        </body>
+                        </html>
+
+
+
+        iv. now write view:
+        // App_Login\views.py:
+
+                from django.shortcuts import render, HttpResponseRedirect
+                from django.urls import reverse
+
+                # Authetication
+                from django.contrib.auth.forms import AuthenticationForm
+                from django.contrib.auth.decorators import login_required
+                from django.contrib.auth import login, logout, authenticate
+
+                # Forms and Models
+                from App_Login.models import Profile
+                from App_Login.forms import ProfileForm, SignUpForm
+
+
+                # Create your views here.
+
+
+                def sign_up(request):
+                        form = SignUpForm()
+                        if request.method == 'POST':
+                                form = SignUpForm(request.POST)
+                                if form.is_valid():
+                                form.save()
+                                return HttpResponseRedirect(reverse())
+
+                        return render(request, 'App_Login/sign_up.html', context={'form': form})
+
+
+        v. add it in urls.py:
+                path('account/signup/', views.sign_up, name='signup'),
+
+
+
+
+        vi. App_Login\views.py:
+                def login_usser(request):
+                        form = AuthenticationForm()
+                        if request.method == 'POST':
+                                form = AuthenticationForm(data=request.POST)
+                                if form.is_valid():
+                                username = form.cleaned_data.get('username')
+                                password = form.cleaned_data.get('password')
+                                user = authenticate(username=username,
+                                                        password=password)  # authenticate
+                                if user is not None:
+                                        login(request, user)    # login koralam
+                                        return HttpResponse('logged in')
+
+                        return render(request, 'App_Login/login.htnk', context={'form': form})
+
+
+        vii. redirect sign_up:
+        // App_Login > views.py > sign_up:
+            return HttpResponseRedirect(reverse('App_Login:login'))
+
+
+        viii. App_Login\urls.py:
+                path('account/login/', views.login_user, name='login'),
+
+
+        // now create signup and login template:
+        ix. templates\App_Login\sign_up.html:
+
+                {% extends 'base.html' %}
+                {% load crispy_forms_tags %}
+                {% block title_block %} Create New Account {% endblock %}
+                {% block body_block %}
+                <h2>Create New Account: </h2>
+                <form method="POST">
+                {{ form|crispy }}
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-sm">Create Account<button>
+                </form>
+                <br>
+                <p>Already have an account?<a href="{% url 'App_Login:login' %}">Login Here</a></p>
+                {% endblock %}
+
+        x. logout view:
+        // App_Login\views.py:
+                @login_required
+                def logout_user(request):
+                        logout(request)
+                        return HttpResponse("Logged Out")
+
+        xi. login template create:
+        // templates\App_Login\login.html:
+
+                {% extends 'base.html' %}
+                {% load crispy_forms_tags %}
+                {% block title_block %} Login {% endblock %}
+                {% block body_block %}
+                        <h2>Login:</h2>
+                        <form>
+                                {{form|crispy}}
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary btn-sm">Login</button>
+                        </form>
+                        <br>
+                        <p>Doesn't have an account? <a href="{% url 'App_Login:signup' %}">Create new Account</a></p>
+                {% endblock %}
+
+
+        xii. logout urls:
+        // App_Login\urls.py:
+                path('account/logout', views.logout_user, name='logout'),
 
 

@@ -1,4 +1,3 @@
-from ensurepip import bootstrap
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -122,4 +121,4 @@ STATICFILES_DIR = [STATIC_DIR, ]
 MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL = '/media/'
 
-LOGIN_URL = '/'
+LOGIN_URL = '/account/login/'

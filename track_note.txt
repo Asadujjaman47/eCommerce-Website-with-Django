@@ -401,7 +401,7 @@ http://127.0.0.1:8000/admin
                                         login(request, user)    # login koralam
                                         return HttpResponse('logged in')
 
-                        return render(request, 'App_Login/login.htnk', context={'form': form})
+                        return render(request, 'App_Login/login.html', context={'form': form})
 
 
         vii. redirect sign_up:
@@ -424,7 +424,7 @@ http://127.0.0.1:8000/admin
                 <form method="POST">
                 {{ form|crispy }}
                 {% csrf_token %}
-                <button type="submit" class="btn btn-success btn-sm">Create Account<button>
+                <button type="submit" class="btn btn-success btn-sm">Create Account</button>
                 </form>
                 <br>
                 <p>Already have an account?<a href="{% url 'App_Login:login' %}">Login Here</a></p>
@@ -445,7 +445,7 @@ http://127.0.0.1:8000/admin
                 {% block title_block %} Login {% endblock %}
                 {% block body_block %}
                         <h2>Login:</h2>
-                        <form>
+                        <form method="POST">
                                 {{form|crispy}}
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-primary btn-sm">Login</button>
@@ -457,6 +457,95 @@ http://127.0.0.1:8000/admin
 
         xii. logout urls:
         // App_Login\urls.py:
-                path('account/logout', views.logout_user, name='logout'),
+                path('account/logout/', views.logout_user, name='logout'),
 
+4. 
+        i. App_Login\urls.py:
+        // remove accounts part:
+                path('signup/', views.sign_up, name='signup'),
+                path('login/', views.login_user, name='login'),
+                path('logout', views.logout_user, name='logout'),
+
+
+
+        ii. settings.py:
+                LOGIN_URL = '/account/login'
+                
+
+        iii. test and run this urls:
+        // run server & go
+                http://127.0.0.1:8000/account/signup/
+
+                // create account and login
+
+
+
+        iv. Profile view:
+        // App_Login\views.py:
+
+                @login_required
+                def user_profile(request):
+                        profile = Profile.objects.get(user=request.user)
+
+                        # generate form
+                        form = ProfileForm(instance=profile)
+                        if request.method == 'POST':
+                                form = ProfileForm(request.POST, instance=profile)
+                                if form.is_valid():
+                                form.save()
+                                form = ProfileForm(instance=profile)
+
+                        return render(request, 'APp_Login/change_profile.html', context={'form': form})
+
+
+        v. now define it, in urls.py:
+                path('profile/', views.user_profile, name='profile'),
+
+        vi. change_profile.html:
+                {% extends 'base.html' %}
+                {% load crispy_forms_tags %}
+                {% block title_block %} Profile {% endblock %}
+                {% block body_block %}
+
+                <form method="POST">
+                {{form|crispy}}
+                {% csrf_token %}
+                <button type="submit" class="btn btn-warning btn-sm">Save</button>
+                </form>
+                {% endblock %}
+
+
+// working with message:
+
+        vii. views.py:
+from django.contrib import messages
+// create message:
+        sign_up:
+            messages.success(request, "Account Created Successfully!")
+
+        logout_user:
+            messages.warning(request, "You are logged Out!!")
+
+        user_profile:
+            messages.success(request, "Changed Saved!!")
+
+
+// now display message:
+// we display at base.html:
+        vii. base.html:
+
+                <div class="container" style="padding-top: 15px">
+                        <div class="messages container mt-2">
+                                {% if messages %}
+                                {% for message in messages%}
+                                <div {% if message.tags %} class="alert alert-{{message.tags}}{% endif %}" role="alert">
+                                        {{message}}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                </div>
+                                {% endfor %}
+                                {% endif %}
+                        </div>
+                        {% block body_block %}  {% endblock %}
+
+                </div>
 

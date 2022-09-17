@@ -1043,3 +1043,130 @@ now it call from product_detail.html:
                         <i class="fas fa-shopping-cart"></i> Add to Cart
                 </a>
 
+
+
+10. cart item view:
+        i. App_Order\views.py:
+                @login_required
+                def cart_view(request):
+                        carts = Cart.objects.filter(user=request.user, purchased=False)
+                        orders = Order.objects.filter(user=request.user, ordered=False)
+                        if carts.exists() and orders.exists():
+                                order = orders[0]
+                                return render(request, 'App_Order/cart.html', context={'carts': carts, 'order': order})
+                        else:
+                                messages.warning(request, "You don't have any item in your cart!")
+                                return redirect("App_Shop:home")
+
+        ii. create App_Order\cart.html:
+        iii. add it in urls.py:
+                path('cart/', views.cart_view, name="cart"),
+
+        iv. cart.html:
+                {% extends 'base.html' %}
+                {% block body_block %}
+                <div class="container my-5">
+                <div class="my-5">
+                        <h2>Your Cart</h2>
+                </div>
+                <table class="tale table-hover">
+                        <thead>
+                        <tr>
+                                <th scope="col" width="15%">#</th>
+                                <th scope="col" width="15%">Product Name</th>
+                                <th scope="col" width="15%">Quantity</th>
+                                <th scope="col" width="15%" align="right">Price</th>
+                                <th scope="col" width="15%">Remove</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for cart in carts %}
+                        <tr>
+                                <th scope="row">{{ forloop.counter }}</th>
+                                <td>{{cart.item.name}}</td>
+                                <td>
+                                <a href="#" class="mr-2"><span class="badge badge-light">
+                                        <i class="fas fa-minus"</i>
+                                </span></a>
+                                {{ cart.quantity }}
+                                <a href="#" class="mr-2"><span class="badge badge-light">
+                                        <i class="fas fa-plus"</i>
+                                </span></a>
+                                </td>
+                                <td align="right">&#2547; {{cart.get_total}}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                                <th scope="row"></th>
+                                <td colspan="3">Total</td>
+                                <td align="right">&#2547; {{order.get_totals | floatformat:2 }}</td>
+                        </tr>
+                        </tbody>
+                </table>
+                </div>
+
+                {% endblock %}
+
+
+
+        // cart e jabo navbar diye:
+        v. templates > navbar.html:
+                <li class="nav-item">
+                        <a href="{% url 'App_Order:cart' %}" class="nav-link">
+                                <i class="fas fa-shopping-cart"></i> Cart
+                        </a>
+                </li>
+        
+
+        vi. cart.html > table > tbody:
+            <tr>
+                <th scope="row"></th>
+                <td colspan="4" class="text-right">
+                    <a href="{% url 'App_Shop:home' %}" class="btn btn-warning mr-4">Continue Shoping</a>
+                    <a href="#" class="btn btn-success mr-4">Procced To Checkout</a>
+                </td>
+            </tr>
+
+
+
+
+//cart e koyta item asay, ta navbar cart er shate dekhabe;
+// er jonno CUSTOM filter likbo;
+// eta jekono jaygay likte pari, App_Order e likbo;
+        vii. create a 'templatetags' folder in App_Order:
+                here 2 file:
+                        __init__.py
+                        cart_tag.py
+
+
+        viii. cart_tag.py:
+                from django import template
+                from App_Order.models import Order
+
+                register = template.Library()
+
+
+                @register.filter
+                def cart_total(user):
+                        order = Order.objects.filter(user=user, ordered=False)
+                        
+                        if order.exists():
+                                return order[0].orderitems.count()
+                        else:
+                                return 0
+
+
+
+
+        iv. navbar.html:
+        {% load cart_tag %}
+
+       // cart.html > table > tbody:
+                <li class="nav-item">
+                          <a href="{% url 'App_Order:cart' %}" class="nav-link">
+                                  <i class="fas fa-shopping-cart"></i> Cart
+                                  <span class="badge badge-light">{{ request.user | cart_total }}</span>
+                           </a>
+                </li>
+
+

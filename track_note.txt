@@ -2,7 +2,7 @@
     i.  create project:
             > django-admin startproject My_Ecom_Project
 
-    ii. create virtual enviroment in CMD:
+    ii. create virtual environment in CMD: (goto 1554 line)
             python -m venv env
             env\Scripts\activate
 
@@ -1551,4 +1551,90 @@ connect with SSLcommerz:
         for RESTAPI:
         install: pip install requests
 -----------------------------------------------
+Proble fix:
+        there was a problem to insall SSLcommerz:
+        error: subprocess-exited-with-error
+
+        because of python version:
+        so i change python version and install python 3.8.10
+        > python --version
+                Python 3.8.10
+        then create environment env with python 3.8 version:
+        > py -3.8 -m venv env
+
+        then activate env:
+        > env\Scripts\activate
+
+        then install SSLcommerz:
+        > pip install sslcommerz-python==0.0.5
+        
+        ---------------------------------------
+        > pip list:
+
+                Package           Version
+                ----------------- ----------
+                astroid           2.3.3
+                certifi           2019.11.28
+                chardet           3.0.4
+                idna              2.8
+                isort             4.3.21
+                lazy-object-proxy 1.4.3
+                mccabe            0.6.1
+                pip               21.1.1
+                requests          2.22.0
+                setuptools        56.0.0
+                six               1.13.0
+                sslcommerz-python 0.0.5
+                typed-ast         1.4.0
+                urllib3           1.25.7
+                wrapt             1.11.2
+
+
+        now i have to install others requirements files:
+        > pip install -r requirements.txt
+
+===============================================================
+
+
+
+
+14. setup SSL:
+        i. views.py:
+
+                from django.shortcuts import render, HttpResponseRedirect, redirect
+
+
+                # for payment
+                import requests
+                from sslcommerz_python.payment import SSLCSession
+                from decimal import Decimal
+                import socket
+
+                # payment view:
+                @login_required
+                def payment(request):
+                        saved_address = BillingAddress.objects.get_or_create(user=request.user)
+                        if not saved_address[0].is_fully_filled():
+                                messages.info(request, f"Please complete shipping address!")
+                                return redirect("App_Payment:checkout")
+
+                        if not request.user.profile.is_fully_filled():
+                                messages.info(request, f"Please complete profile details!")
+                                return redirect("App_Login:profile")
+
+                        return render(request, "App_Payment/payment.html", context={})
+
+
+        ii. create templates\App_Payment\payment.html:
+
+        iii. define its path in urls.py:
+                 path('pay/', views.payment, name="pay"),
+
+        iv. checkout.html:
+            <a href="{% url 'App_Payment:pay' %}" class="btn btn-warning btn-md">Make Payment</a>
+
+
+
+SSLcommerz doc:
+        https://developer.sslcommerz.com/doc/v4/
 

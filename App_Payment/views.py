@@ -17,6 +17,8 @@ from sslcommerz_python.payment import SSLCSession
 from decimal import Decimal
 import socket
 
+from django.views.decorators.csrf import csrf_exempt
+
 from decouple import config
 
 # Create your views here.
@@ -94,6 +96,20 @@ def payment(request):
     return redirect(response_data['GatewayPageURL'])
 
 
-@login_required
+@csrf_exempt
 def complete(request):
-    render(request, "App_Payment/complete.html", context={})
+    if request.method == 'POST' or request.method == 'post':
+        payment_data = request.POST
+    # print(payment_data)
+    # print(payment_data['status'])
+        status = payment_data['status']
+        val_id = payment_data['val_id']
+        tran_id = payment_data['tran_id']
+        bank_tran_id = payment_data['bank_tran_id']
+        if status == 'VALID':
+            messages.success(request, f"Your Payment Completed Successfully")
+        elif status == 'FAILED':
+            messages.warning(
+                request, f"Your Payment Failed! Please Try Again!")
+
+    return render(request, "App_Payment/complete.html", context={})

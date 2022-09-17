@@ -1707,3 +1707,36 @@ SSLcommerz doc:
 
 
 
+16. csrf verification, cancel:
+        i. views.py:
+                from django.views.decorators.csrf import csrf_exempt
+                        // it will not check csrf
+
+
+                @csrf_exempt
+                def complete(request):
+                        if request.method == 'POST' or request.method == 'post':
+                                payment_data = request.POST
+                        # print(payment_data)
+                        # print(payment_data['status'])
+                                status = payment_data['status']
+                                val_id = payment_data['val_id']
+                                tran_id = payment_data['tran_id']
+                                bank_tran_id = payment_data['bank_tran_id']
+                                if status == 'VALID':
+                                        messages.success(request, f"Your Payment Completed Successfully")
+                                        elif status == 'FAILED':
+                                        messages.warning(
+                                                request, f"Your Payment Failed! Please Try Again!")
+
+                        return render(request, "App_Payment/complete.html", context={})
+
+
+------------------------------------------------------
+NOTE:
+        dot(.) diye template e value pabo
+        data['key'] diye view/django te value pabo
+------------------------------------------------------
+
+
+

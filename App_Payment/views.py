@@ -60,6 +60,7 @@ def payment(request):
         messages.info(request, f"Please complete profile details!")
         return redirect("App_Login:profile")
 
+    # https://pypi.org/project/sslcommerz-python/0.0.5/
     # 1st
     store_id = config('Store_ID')
     API_key = config('API_Key')
@@ -133,3 +134,15 @@ def purchase(request, val_id, tran_id):
         item.save()
 
     return HttpResponseRedirect(reverse("App_Shop:home"))
+
+
+@login_required
+def order_view(request):
+    try:
+        orders = Order.objects.filter(user=request.user, ordered=True)
+        context = {"orders": orders}
+    except:
+        messages.warning(request, "You have no an active order")
+        return redirect("App_shop:home")
+
+    return render(request, "App_Payment/order.html", context)

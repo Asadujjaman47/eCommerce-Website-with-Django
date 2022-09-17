@@ -8,6 +8,6 @@ urlpatterns = [
     path('pay/', views.payment, name="pay"),
     path('status/', views.complete, name="complete"),
     path('purchase/<val_id>/<tran_id>/', views.purchase, name="purchase"),
-
+    path('orders/', views.order_view, name="orders"),
 
 ]

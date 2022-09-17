@@ -920,7 +920,7 @@ from django.contrib import messages
         vi. order's urls.py:
                 from django.urls import path
 
-                App_name = 'App_Order'
+                app_name = 'App_Order'
 
 
                 urlpatterns = [
@@ -988,3 +988,58 @@ from django.contrib import messages
         
         // admin diye item add korle kaj hobe na, CZ Cart er shate Order e te o add korte hobe,
         // ja view diye korbo
+
+
+9. write a view for add item in Cart:
+        i. App_Order\views.py:
+                from django.shortcuts import render, get_object_or_404, redirect
+
+                # Authentications
+                from django.contrib.auth.decorators import login_required
+
+                # Model
+                from App_Order.models import Cart, Order
+
+                from App_Shop.models import Product
+
+                # Messages
+                from django.contrib import messages
+
+
+                # Create your views here.
+
+                @login_required
+                def add_to_cart(request, pk):
+                item = get_object_or_404(Product, pk=pk)
+                order_item = Cart.objects.get_or_create(
+                        item=item, user=request.user, purchased=False)
+                order_qs = Order.objects.filter(user=request.user, ordered=False)
+                if order_qs.exists():
+                        order = order_qs[0]
+                        if order.orderitems.filter(item=item).exists():
+                        order_item[0].quantity += 1
+                        order_item[0].save()
+                        messages.info(request, "THis item quantuty was updated.")
+                        return redirect("App_Shop:home")
+                        else:
+                        order.orderitems.add(order_item[0])
+                        messages.info(request, "THis item was added to your cart.")
+                        return redirect("App_Shop:home")
+                else:
+                        order = Order(user=request.user)
+                        order.save()
+                        order.orderitems.add(order_item[0])
+                        messages.info(request, "This item was added to your  cart.")
+                        return redirect("App_Shop:home")
+
+
+        ii. App_Order\urls.py:
+                path('add/<pk>/', views.add_to_cart, name="add"),
+
+now it call from product_detail.html:
+        iii. product_detail.html:
+
+                <a href="{% url 'App_Order:add' pk=object.pk %}" class="btn btn-lg btn-outline-primary text-uppercase">
+                        <i class="fas fa-shopping-cart"></i> Add to Cart
+                </a>
+

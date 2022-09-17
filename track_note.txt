@@ -1517,3 +1517,38 @@ def decrease_cart(request, pk):
                     </div>
                 </div>
 
+
+
+13. add Payment button:
+// pre condition is: must fillup all Shipping Address fields:
+        i. views.py:
+        // send saved_address
+
+                    return render(request, 'App_Payment/checkout.html', context={'form': form, 'order_items': order_items, 'order_total': order_total, 'saved_address': saved_address})
+
+        ii. checkout.html:
+        {% if saved_address.is_fully_filled %}
+            <a href="" class="btn btn-warning btn-md">Make Payment</a>
+            {% else %}
+            <div class="alert alert-info">
+                <p>Please fill up all the information to make payment.</p>
+            </div>
+        {% endif %}
+
+
+-----------------------------------------------
+// payment handle: SSL commerz
+// here we show demo payment:
+https://developer.sslcommerz.com/
+        here sign up,
+        and get Store ID: 
+        Store Password (API/Secret Key):       
+
+connect with SSLcommerz:
+        install:        pip install sslcommerz-python
+
+
+        for RESTAPI:
+        install: pip install requests
+-----------------------------------------------
+
